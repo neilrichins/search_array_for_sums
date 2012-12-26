@@ -1,0 +1,100 @@
+#!/usr/bin/php
+<?PHP
+
+#Config variables for testing 
+$max_elements=40;	// Maximun number of elements to test with
+$min_elements=4;	// Minimun number of elements to test with
+$min_value=1;		// Smallest array value to test with
+$max_value=10;		// Largest array value to test with
+$target=rand($min_value,$max_value)*$max_elements/2;	//Target value to look for
+
+// Create test array
+$elements=rand($min_elements,$max_elements);
+$test_data=array();
+while (--$elements >= 0 ){
+		$test_data[]=rand($min_value,$max_value);
+}
+
+//Check to see if cli parameters were passed
+if (isset($argv[1])){
+		if (!isset($argv[2])){
+				die( "usage ".$argv[0]." sum  val1 val2 ... \n\n");
+		}else{
+				$target=$argv[1];
+				$test_data=$argv;
+				array_shift($test_data);
+				array_shift($test_data);
+		}
+}
+
+
+// Display test array
+echo "\n\n######################\n Looking for a sum of $target in ";
+print_r($test_data);
+
+// Display the sum of the array
+echo "Total number of values in the array adding up to $target is: ".sum_count($test_data,$target,true)."\n";
+//
+
+
+#This function to return the number of combinations, of any length, that add up to that target_sum.
+#total_combinations = calculate_combinations([5, 5, 15, 10], target_sum=15)
+#  sum_count( Array of numbers, Sum to search for , Display results?  ){
+function sum_count($arr,$sum,$display_results=false){
+
+		// Get an array of all the posible values to test the sum for
+		$temp_array=$arr;
+		$result=sums($temp_array);
+
+		//Compute all the sumes and keep just the sums that returm the result we are looking for
+		$result = array_filter($result,function($var) use ($sum) { return (array_sum($var) ==  $sum) ;});
+		
+		// Display results if in debug mode
+		if ($display_results){
+	    	echo "\nresults found:";	
+			print_r($result);
+		}
+		
+		//Return Output
+		return count($result);
+		
+}
+
+
+# This function  takes a one dimensional array and creates a two dimensonal array of values for a sums table
+# example:   1 2 3 
+# becomes:   1
+#            2
+#            1 2
+#            3
+#            1 3
+#            2 3 
+#            1 2 3
+function  sums($array, &$list=array()) {
+
+		$temp=array();
+		
+		// get the  exement from the array
+        $elem =array_shift($array);
+
+		// add the element to the list 
+		if ( count($list) > 0  ){
+				foreach ($list as $key => $value){
+        					$temp[$key] = array_merge(array($elem), $list[$key]);
+				}
+				$list=array_merge($list,$temp);
+				$list[]=array($elem);
+		}else{
+				$list=array(array($elem));
+		}
+
+
+		// call recursively to handle all elemements
+		if (count($array) > 0) {
+				$list=sums($array, $list);
+		}
+		
+  		return $list ;
+}
+
+?>
